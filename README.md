@@ -1,6 +1,6 @@
 # snapper-enhanced
 
-Enhancement that will add last apt command as the description of the pre/post snapshot.
+Enhancement that will add last package manager command as the description of the pre/post snapshot.
 
 ![snapper-enhanced Image](https://tmiland.github.io/snapper-enhanced/res/snapper-enhanced.png)
 
@@ -26,28 +26,18 @@ Options are:
 - Latest release
 ```bash
 git clone https://github.com/tmiland/snapper-enhanced.git ~/.snapper-enhanced \
+mkdir ~/.snapper-enhanced \
 cd ~/.snapper-enhanced \
 git fetch --tags \
-latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)") \
-git checkout $latestTag \
+git checkout $(git describe --tags "$(git rev-list --tags --max-count=1)") \
 ./install -i
 ```
 
-- Master
+- Main
 ```bash
 git clone https://github.com/tmiland/snapper-enhanced.git ~/.snapper-enhanced \
 cd ~/.snapper-enhanced \
 ./install -i
-```
-
-To reinstall
-```bash
-./install -r
-```
-
-To uninstall
-```bash
-./install -u
 ```
 
 ## Inspiration
