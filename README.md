@@ -25,19 +25,19 @@ Options are:
 ## Installation
 - Latest release
 ```bash
-git clone https://github.com/tmiland/snapper-enhanced.git ~/.snapper-enhanced \
-mkdir ~/.snapper-enhanced \
-cd ~/.snapper-enhanced \
-git fetch --tags \
-git checkout $(git describe --tags "$(git rev-list --tags --max-count=1)") \
-./install -i
+git clone https://github.com/tmiland/snapper-enhanced.git ~/.snapper-enhanced && \
+cd ~/.snapper-enhanced && \
+git fetch --tags && \
+release="$(git describe --tags "$(git rev-list --tags --max-count=1)")" && \
+git checkout $release && \
+./install.sh -i
 ```
 
 - Main
 ```bash
-git clone https://github.com/tmiland/snapper-enhanced.git ~/.snapper-enhanced \
-cd ~/.snapper-enhanced \
-./install -i
+git clone https://github.com/tmiland/snapper-enhanced.git ~/.snapper-enhanced && \
+cd ~/.snapper-enhanced && \
+./install.sh -i
 ```
 
 ## Inspiration
