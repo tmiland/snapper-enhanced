@@ -40,6 +40,13 @@ cd ~/.snapper-enhanced && \
 ./install.sh -i
 ```
 
+- Update
+```bash
+cd ~/.snapper-enhanced && \
+git pull && \
+./install.sh -r
+```
+
 ## Inspiration
 - [openSUSE/snapper](https://github.com/openSUSE/snapper) on Debian.
 - [Debian snapper apt script](https://gist.github.com/imthenachoman/f722f6d08dfb404fed2a3b2d83263118) to get last apt command.
