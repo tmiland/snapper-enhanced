@@ -5,9 +5,9 @@
 
 
 ######################################################################
-####                    Invidious Update.sh                       ####
-####            Automatic update script for Invidious             ####
-####            Script to update or install Invidious             ####
+####                   Snapper Enchanced.sh                       ####
+####    Enhancement that will add last package manager command    ####
+####         as the description of the pre/post snapshot.         ####
 ####                   Maintained by @tmiland                     ####
 ######################################################################
 
@@ -72,7 +72,7 @@ readonly CONF_FILE=/etc/snapper-enhanced.conf
 
 get_property() {
   if [ ! -f $CONF_FILE ]; then
-    ok "$CONF_FILE not found! Using $1=$3" >&2;
+    warn "$CONF_FILE not found! Using $1=$3" >&2;
     param_value=$3
   else
     param_value=$(sed '/^\#/d' $CONF_FILE | grep "\b$1\b" |\
@@ -92,7 +92,7 @@ get_property() {
 # Default value is true.
 update_grub() {
 if eval "$(get_property "updateGrub" "boolean" "false")" && [[ -d /etc/default/grub-btrfs ]]; then
-  grub-mkconfig -o /boot/grub/grub.cfg
+  grub-mkconfig -o /boot/grub/grub.cfg || error "Something went wrong updating grub."
 fi
 }
 
@@ -129,16 +129,12 @@ if [ -e /etc/default/snapper ] ; then
   . /etc/default/snapper
 fi
 
-if [ -e /etc/apt/apt.conf.d/80snapper ] ; then
-  warn "Deleting default /etc/apt/apt.conf.d/80snapper file.."
-  rm -rf /etc/apt/apt.conf.d/80snapper || error "Unable to delete /etc/apt/apt.conf.d/80snapper. Please remove manually."
-  ok "Done."
-fi
-
+# Disable snapper snapshots
 if grep "DISABLE_APT_SNAPSHOT=\"no\"" /etc/default/snapper
 then
   warn "DISABLE_APT_SNAPSHOT is set to no, disabling apt snapshot for snapper."
-  sed -i "s|DISABLE_APT_SNAPSHOT=.*|DISABLE_APT_SNAPSHOT=\"yes\"|g" /etc/default/snapper
+  sed -i "s|DISABLE_APT_SNAPSHOT=.*|DISABLE_APT_SNAPSHOT=\"yes\"|g" /etc/default/snapper ||
+  error "Unable to disable snapper snapshots for apt."
 fi
 
 # what action are we taking
@@ -154,12 +150,16 @@ else
     # and if /etc/snapper/configs/root exists
     if [[ $(command -v '/usr/bin/snapper') ]] && [[ -e /etc/snapper/configs/root ]] ; then
       # delete any lingering temp files
-      rm -f $snapper_apt_enhanced_tmp #|| true
+      rm -f $snapper_apt_enhanced_tmp || error "Unable to delete $snapper_apt_enhanced_tmp."
       # create a snapshot
       # and save the snapshot number for reference later
-      snapper create -d "${SNAPPER_DESCRIPTION}" -c number -t pre -p > $snapper_apt_enhanced_tmp #|| true
+      snapper create -d "${SNAPPER_DESCRIPTION}" -c number -t pre -p > $snapper_apt_enhanced_tmp ||
+      error "Unable to create snapper snapshot."
       # clean up snapper
-      snapper cleanup number #|| true
+      snapper cleanup number ||
+      error "Unable to run snapper cleanup."
+    else
+      error "Either snapper is not installed, or not configured."
     fi
     update_grub
   fi
@@ -177,9 +177,13 @@ else
     if [[ $(command -v '/usr/bin/snapper') ]] && [[ -e $snapper_apt_enhanced_tmp ]]
     then
       # take a post snapshot and link it to the # of the pre snapshot
-      snapper create -d "${SNAPPER_DESCRIPTION}" -c number -t post --pre-number="$(cat $snapper_apt_enhanced_tmp)" #|| true
+      snapper create -d "${SNAPPER_DESCRIPTION}" -c number -t post --pre-number="$(cat $snapper_apt_enhanced_tmp)" ||
+      error "Unable to create snapper snapshot."
       # clean up snapper
-      snapper cleanup number #|| true
+      snapper cleanup number ||
+      error "Unable to run snapper cleanup."
+    else
+      error "Either snapper is not installed, or not configured."
     fi
     update_grub
   fi
