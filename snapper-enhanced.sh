@@ -120,6 +120,12 @@ done
 if [[ "$(ps -ho comm "${PID}")" = "apt" ]] ; then
   LAST_CMD="$(ps -ho args "${PID}")"
 fi
+# If command is empty
+if [ -z "$LAST_CMD" ]; then
+  LAST_CMD="apt"
+fi
+# Limit output length
+LAST_CMD="${LAST_CMD:0:35}"
 
 # Set snapshot description
 SNAPPER_DESCRIPTION="{snapper-enhanced} {created $1 command: $LAST_CMD}"
